@@ -126,9 +126,13 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
 /* smooth transitions for theme changes */
 @layer utilities {
   html {
     @apply transition-colors duration-300;
   }
 }
+
