@@ -36,7 +36,7 @@ export function Header() {
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         <Link href="/" className="text-xl font-bold tracking-tight">
-          Studio
+        Fuzail's Studio
         </Link>
 
         <div className="hidden md:flex items-center gap-8">
