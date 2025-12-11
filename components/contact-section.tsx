@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import emailjs from "@emailjs/browser"
+import { useRef, useState } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -111,6 +111,22 @@ export function ContactSection() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
   }
 
+  const form = useRef<HTMLFormElement | null>(null);
+  const sendEmail = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (form.current) {
+      emailjs.sendForm('service_3bhzrj8', 'template_5z7gk9h', form.current, 'user_XYZ123')
+        .then((result) => {
+          console.log(result.text);
+          alert("Message sent successfully!");
+        }, (error) => {
+          console.log(error.text);
+          alert("An error occurred, please try again.");
+        });
+    }
+  };
+
   return (
     <section id="contact" className="py-20 md:py-32 px-4 sm:px-6 lg:px-8 bg-card">
       <div className="max-w-2xl mx-auto">
@@ -130,7 +146,7 @@ export function ContactSection() {
         </motion.div>
 
         <motion.form
-          onSubmit={handleSubmit}
+          onSubmit={sendEmail}
           className="space-y-6"
           variants={containerVariants}
           initial="hidden"
@@ -157,7 +173,7 @@ export function ContactSection() {
             />
             {errors.name && (
               <p className="text-sm text-destructive flex gap-1">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 " />
                 {errors.name}
               </p>
             )}
@@ -180,7 +196,7 @@ export function ContactSection() {
             />
             {errors.email && (
               <p className="text-sm text-destructive flex gap-1">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 " />
                 {errors.email}
               </p>
             )}
@@ -203,7 +219,7 @@ export function ContactSection() {
             />
             {errors.phone && (
               <p className="text-sm text-destructive flex gap-1">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 " />
                 {errors.phone}
               </p>
             )}
@@ -246,7 +262,7 @@ export function ContactSection() {
             />
             {errors.message && (
               <p className="text-sm text-destructive flex gap-1">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 " />
                 {errors.message}
               </p>
             )}
@@ -259,7 +275,7 @@ export function ContactSection() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+              <Check className="w-5 h-5 text-green-600 dark:text-green-400  mt-0.5" />
               <div>
                 <p className="font-medium text-green-900 dark:text-green-100">Message sent!</p>
                 <p className="text-sm text-green-800 dark:text-green-200">I'll get back to you soon.</p>
@@ -273,7 +289,7 @@ export function ContactSection() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400  mt-0.5" />
               <div>
                 <p className="font-medium text-red-900 dark:text-red-100">Something went wrong.</p>
                 <p className="text-sm text-red-800 dark:text-red-200">Please try again later.</p>
