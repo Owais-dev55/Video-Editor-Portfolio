@@ -1,130 +1,124 @@
-"use client"
+"use client";
 
-import type React from "react"
-import emailjs from "@emailjs/browser"
-import { useRef, useState } from "react"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Check, AlertCircle } from "lucide-react"
+import React, { useRef, useState } from "react";
+import emailjs from "@emailjs/browser";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Check, AlertCircle } from "lucide-react";
 
-type FormState = "idle" | "loading" | "success" | "error"
+type FormState = "idle" | "loading" | "success" | "error";
 
-function validateEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
-}
-
-function validateName(name: string): boolean {
-  return name.trim().length >= 2 && name.trim().length <= 100
-}
-
-function validateMessage(message: string): boolean {
-  return message.trim().length >= 10 && message.trim().length <= 5000
-}
-
-function validatePhone(phone: string): boolean {
-  if (!phone) return true // optional field
-  const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/
-  return phoneRegex.test(phone)
-}
+const SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!;
+const TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!;
+const AUTOREPLY_ID =
+  process.env.NEXT_PUBLIC_EMAILJS_AUTORESPONSE_TEMPLATE_ID!;
+const PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!;
 
 export function ContactSection() {
-  const [formState, setFormState] = useState<FormState>("idle")
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [formState, setFormState] = useState<FormState>("idle");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
+    to_email: "",
     phone: "",
     budget: "under-5k",
     message: "",
-    honeypot: "", // spam protection
-  })
+    honeypot: "",
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+  const form = useRef<HTMLFormElement>(null);
+
+  // ===== VALIDATION ===== //
+  const validateEmail = (email: string): boolean =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const validateName = (name: string): boolean =>
+    name.trim().length >= 2 && name.trim().length <= 100;
+
+  const validateMessage = (msg: string): boolean =>
+    msg.trim().length >= 10 && msg.trim().length <= 5000;
+
+  const validatePhone = (phone: string): boolean => {
+    if (!phone) return true;
+    return /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,4}[-\s.]?[0-9]{1,9}$/.test(
+      phone
+    );
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
     if (errors[name]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev }
-        delete newErrors[name]
-        return newErrors
-      })
+      const clone = { ...errors };
+      delete clone[name];
+      setErrors(clone);
     }
-  }
+  };
 
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
-    if (!validateName(formData.name)) {
-      newErrors.name = "Name must be 2-100 characters"
-    }
-    if (!validateEmail(formData.email)) {
-      newErrors.email = "Please enter a valid email"
-    }
-    if (formData.phone && !validatePhone(formData.phone)) {
-      newErrors.phone = "Please enter a valid phone number"
-    }
-    if (!validateMessage(formData.message)) {
-      newErrors.message = "Message must be 10-5000 characters"
-    }
+    if (!validateName(formData.name)) newErrors.name = "Name must be 2–100 characters.";
+    if (!validateEmail(formData.to_email)) newErrors.to_email = "Enter a valid email.";
+    if (formData.phone && !validatePhone(formData.phone))
+      newErrors.phone = "Invalid phone number.";
+    if (!validateMessage(formData.message))
+      newErrors.message = "Message must be 10–5000 characters.";
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  // ===== SEND EMAIL ===== //
+  const sendEmail = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-    if (formData.honeypot) {
-      return
-    }
+    if (formData.honeypot) return;
+    if (!validateForm()) return;
 
-    if (!validateForm()) return
-
-    setFormState("loading")
+    setFormState("loading");
 
     try {
-      // Simulate API call - in production would send to backend
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Send main email (to you)
+      await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form.current!, PUBLIC_KEY);
 
-      setFormState("success")
-      setFormData({ name: "", email: "", phone: "", budget: "under-5k", message: "", honeypot: "" })
-      setTimeout(() => setFormState("idle"), 3000)
-    } catch {
-      setFormState("error")
-      setTimeout(() => setFormState("idle"), 3000)
+      // Send auto-responder (to the user)
+      await emailjs.sendForm(SERVICE_ID, AUTOREPLY_ID, form.current!, PUBLIC_KEY);
+
+      setFormState("success");
+
+      setFormData({
+        name: "",
+        to_email: "",
+        phone: "",
+        budget: "under-5k",
+        message: "",
+        honeypot: "",
+      });
+
+      setTimeout(() => setFormState("idle"), 3000);
+    } catch (err) {
+      console.log("EmailJS error:", err);
+      setFormState("error");
+      setTimeout(() => setFormState("idle"), 3000);
     }
-  }
+  };
 
+  // Animations
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 },
-    },
-  }
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+  };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-  }
-
-  const form = useRef<HTMLFormElement | null>(null);
-  const sendEmail = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (form.current) {
-      emailjs.sendForm('service_3bhzrj8', 'template_5z7gk9h', form.current, 'user_XYZ123')
-        .then((result) => {
-          console.log(result.text);
-          alert("Message sent successfully!");
-        }, (error) => {
-          console.log(error.text);
-          alert("An error occurred, please try again.");
-        });
-    }
   };
 
   return (
@@ -137,15 +131,16 @@ export function ContactSection() {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-balance">
-            Let's Create Something Amazing
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
+            Let’s Work Together 🎬
           </h2>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            Have a project in mind? Get in touch and let's discuss how I can help bring your vision to life.
+          <p className="text-lg text-muted-foreground">
+            Tell me your idea — I’ll help you turn it into a cinematic experience.
           </p>
         </motion.div>
 
         <motion.form
+          ref={form}
           onSubmit={sendEmail}
           className="space-y-6"
           variants={containerVariants}
@@ -153,151 +148,123 @@ export function ContactSection() {
           whileInView="visible"
           viewport={{ once: true }}
         >
-          {/* Honeypot field - hidden from users */}
-          <input type="hidden" name="honeypot" value={formData.honeypot} onChange={handleChange} />
+          <input type="hidden" name="honeypot" value={formData.honeypot} />
 
-          {/* Name */}
+          {/* NAME */}
           <motion.div className="space-y-2" variants={itemVariants}>
-            <label htmlFor="name" className="block text-sm font-medium">
-              Full Name *
-            </label>
+            <label className="font-medium text-sm">Full Name *</label>
             <Input
-              id="name"
               name="name"
-              type="text"
-              placeholder="Your name"
               value={formData.name}
               onChange={handleChange}
-              className={errors.name ? "border-destructive focus-visible:ring-destructive" : ""}
-              disabled={formState === "loading"}
+              placeholder="John Doe"
+              className={errors.name ? "border-destructive" : ""}
             />
             {errors.name && (
               <p className="text-sm text-destructive flex gap-1">
-                <AlertCircle className="w-4 h-4 " />
-                {errors.name}
+                <AlertCircle size={16} /> {errors.name}
               </p>
             )}
           </motion.div>
 
-          {/* Email */}
+          {/* EMAIL */}
           <motion.div className="space-y-2" variants={itemVariants}>
-            <label htmlFor="email" className="block text-sm font-medium">
-              Email Address *
-            </label>
+            <label className="font-medium text-sm">Email Address *</label>
             <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="your@email.com"
-              value={formData.email}
+              name="to_email"
+              value={formData.to_email}
               onChange={handleChange}
-              className={errors.email ? "border-destructive focus-visible:ring-destructive" : ""}
-              disabled={formState === "loading"}
+              placeholder="you@example.com"
+              className={errors.to_email ? "border-destructive" : ""}
             />
-            {errors.email && (
+            {errors.to_email && (
               <p className="text-sm text-destructive flex gap-1">
-                <AlertCircle className="w-4 h-4 " />
-                {errors.email}
+                <AlertCircle size={16} /> {errors.to_email}
               </p>
             )}
           </motion.div>
 
-          {/* Phone */}
+          {/* PHONE */}
           <motion.div className="space-y-2" variants={itemVariants}>
-            <label htmlFor="phone" className="block text-sm font-medium">
-              Phone Number (Optional)
-            </label>
+            <label className="font-medium text-sm">Phone (Optional)</label>
             <Input
-              id="phone"
               name="phone"
-              type="tel"
-              placeholder="+1 (555) 000-0000"
               value={formData.phone}
               onChange={handleChange}
-              className={errors.phone ? "border-destructive focus-visible:ring-destructive" : ""}
-              disabled={formState === "loading"}
+              placeholder="+1 555 000 000"
+              className={errors.phone ? "border-destructive" : ""}
             />
             {errors.phone && (
               <p className="text-sm text-destructive flex gap-1">
-                <AlertCircle className="w-4 h-4 " />
-                {errors.phone}
+                <AlertCircle size={16} /> {errors.phone}
               </p>
             )}
           </motion.div>
 
-          {/* Budget */}
+          {/* BUDGET */}
           <motion.div className="space-y-2" variants={itemVariants}>
-            <label htmlFor="budget" className="block text-sm font-medium">
-              Project Budget (Optional)
-            </label>
+            <label className="font-medium text-sm">Project Budget</label>
             <select
-              id="budget"
               name="budget"
               value={formData.budget}
               onChange={handleChange}
-              disabled={formState === "loading"}
-              className="w-full px-3 py-2 rounded-md border border-input bg-background text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+              className="w-full px-3 py-2 rounded border bg-background"
             >
               <option value="under-5k">Under $5,000</option>
-              <option value="5k-10k">$5,000 - $10,000</option>
-              <option value="10k-25k">$10,000 - $25,000</option>
+              <option value="5k-10k">$5,000 – $10,000</option>
+              <option value="10k-25k">$10,000 – $25,000</option>
               <option value="25k-plus">$25,000+</option>
             </select>
           </motion.div>
 
-          {/* Message */}
+          {/* MESSAGE */}
           <motion.div className="space-y-2" variants={itemVariants}>
-            <label htmlFor="message" className="block text-sm font-medium">
-              Message *
-            </label>
+            <label className="font-medium text-sm">Message *</label>
             <Textarea
-              id="message"
               name="message"
-              placeholder="Tell me about your project..."
-              rows={5}
               value={formData.message}
               onChange={handleChange}
-              className={errors.message ? "border-destructive focus-visible:ring-destructive" : ""}
-              disabled={formState === "loading"}
+              placeholder="Tell me about your project..."
+              rows={5}
+              className={errors.message ? "border-destructive" : ""}
             />
             {errors.message && (
               <p className="text-sm text-destructive flex gap-1">
-                <AlertCircle className="w-4 h-4 " />
-                {errors.message}
+                <AlertCircle size={16} /> {errors.message}
               </p>
             )}
           </motion.div>
 
-          {/* Status Message */}
+          {/* SUCCESS / ERROR MESSAGE */}
           {formState === "success" && (
             <motion.div
-              className="p-4 rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 flex gap-3"
+              className="p-4 rounded bg-green-100 border border-green-300 flex gap-3"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <Check className="w-5 h-5 text-green-600 dark:text-green-400  mt-0.5" />
+              <Check className="text-green-600" />
               <div>
-                <p className="font-medium text-green-900 dark:text-green-100">Message sent!</p>
-                <p className="text-sm text-green-800 dark:text-green-200">I'll get back to you soon.</p>
+                <p className="font-medium">Message sent!</p>
+                <p className="text-sm">Thanks — I’ll reply soon.</p>
               </div>
             </motion.div>
           )}
 
           {formState === "error" && (
             <motion.div
-              className="p-4 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 flex gap-3"
+              className="p-4 rounded bg-red-100 border border-red-300 flex gap-3"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400  mt-0.5" />
+              <AlertCircle className="text-red-600" />
               <div>
-                <p className="font-medium text-red-900 dark:text-red-100">Something went wrong.</p>
-                <p className="text-sm text-red-800 dark:text-red-200">Please try again later.</p>
+                <p className="font-medium">Something went wrong.</p>
+                <p className="text-sm">Please try again later.</p>
               </div>
             </motion.div>
           )}
 
-          {/* Submit Button */}
+          {/* BUTTON */}
           <motion.div variants={itemVariants}>
             <Button
               type="submit"
@@ -305,20 +272,15 @@ export function ContactSection() {
               className="w-full"
               disabled={formState === "loading" || formState === "success"}
             >
-              {formState === "loading" ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
-                  Sending...
-                </>
-              ) : (
-                "Send Message"
-              )}
+              {formState === "loading" ? "Sending..." : "Send Message"}
             </Button>
           </motion.div>
 
-          <p className="text-xs text-muted-foreground text-center">We respect your privacy. No spam, ever.</p>
+          <p className="text-xs text-muted-foreground text-center">
+            No spam, no BS — just a friendly response.
+          </p>
         </motion.form>
       </div>
     </section>
-  )
+  );
 }
