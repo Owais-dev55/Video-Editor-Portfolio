@@ -5,7 +5,7 @@ import { OverviewSection } from "@/components/overview-section"
 import { ThreeDModelSection } from "@/components/three-d-model-section"
 import { VideoGallerySection } from "@/components/video-gallery-section"
 import { TestimonialsSection } from "@/components/testimonials-section"
-import { ReviewFormSection } from "@/components/review-form-section"
+// import { ReviewFormSection } from "@/components/review-form-section"
 import { ContactSection } from "@/components/contact-section"
 import { Footer } from "@/components/footer"
 
@@ -19,7 +19,7 @@ export default function Home() {
       <ThreeDModelSection />
       <VideoGallerySection />
       <TestimonialsSection />
-      <ReviewFormSection />
+      {/* <ReviewFormSection /> */}
       <ContactSection />
       <Footer />
     </main>

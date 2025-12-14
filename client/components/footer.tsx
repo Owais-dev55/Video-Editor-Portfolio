@@ -1,6 +1,6 @@
 "use client"
 import { motion } from "framer-motion"
-import { Github, Linkedin, Twitter, Mail, ArrowUp } from "lucide-react"
+import {  Linkedin, Twitter, Mail, ArrowUp, Instagram } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function Footer() {
@@ -11,10 +11,8 @@ export function Footer() {
   const currentYear = new Date().getFullYear()
 
   const socialLinks = [
-    { icon: Github, href: "#1", label: "GitHub" },
-    { icon: Linkedin, href: "#2", label: "LinkedIn" },
-    { icon: Twitter, href: "#3", label: "Twitter" },
-    { icon: Mail, href: "#4", label: "Email" },
+    { icon: Instagram, href: "https://www.instagram.com/exxceptional_creations?igsh=aGJsdmMyM2xkdTls&utm_source=qr", label: "Instragram" },
+    { icon: Linkedin, href: "https://www.linkedin.com/in/fuzail-shahzad-337229397?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app", label: "LinkedIn" },
   ]
 
   const quickLinks = [
@@ -92,6 +90,7 @@ export function Footer() {
                 const Icon = social.icon
                 return (
                   <a
+                  target="_blank"
                     key={social.href}
                     href={social.href}
                     aria-label={social.label}

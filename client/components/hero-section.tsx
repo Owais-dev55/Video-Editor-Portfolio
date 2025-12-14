@@ -1,8 +1,9 @@
 "use client"
 
 import Image from "next/image"
-import { motion } from "framer-motion"
+import { motion, easeOut } from "framer-motion"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export function HeroSection() {
   const containerVariants = {
@@ -21,7 +22,7 @@ export function HeroSection() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.8, ease: "easeOut" },
+      transition: { duration: 0.8, ease: easeOut },
     },
   }
 
@@ -30,7 +31,7 @@ export function HeroSection() {
     visible: {
       opacity: 1,
       scale: 1,
-      transition: { duration: 1, ease: "easeOut" },
+      transition: { duration: 1, ease: easeOut },
     },
   }
 
@@ -70,10 +71,14 @@ export function HeroSection() {
 
             <motion.div className="flex flex-col sm:flex-row gap-4 pt-4" variants={itemVariants}>
               <Button size="lg" className="gap-2">
+                <Link href="#work">
                 View Work
+                </Link>
               </Button>
               <Button size="lg" variant="outline">
+                <Link href="#contact">
                 Get in Touch
+                </Link>
               </Button>
             </motion.div>
 
