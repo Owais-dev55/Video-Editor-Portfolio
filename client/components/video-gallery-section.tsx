@@ -88,14 +88,14 @@ function VideoModal({
 
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 bg-background/80 rounded-full hover:bg-background transition-colors"
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 p-2 bg-background/80 rounded-full hover:bg-background transition-colors"
               aria-label="Close video"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="p-6 border-t border-border">
-              <h3 className="font-semibold text-lg">{video.title}</h3>
+            <div className="p-4 sm:p-6 border-t border-border">
+              <h3 className="font-semibold text-base sm:text-lg">{video.title}</h3>
             </div>
           </motion.div>
         </motion.div>
@@ -113,10 +113,7 @@ export function VideoGallerySection() {
   const updateScrollButtons = () => {
     if (!scrollRef.current) return
     setCanScrollLeft(scrollRef.current.scrollLeft > 0)
-    setCanScrollRight(
-      scrollRef.current.scrollLeft <
-        scrollRef.current.scrollWidth - scrollRef.current.clientWidth - 10
-    )
+    setCanScrollRight(scrollRef.current.scrollLeft < scrollRef.current.scrollWidth - scrollRef.current.clientWidth - 10)
   }
 
   useEffect(() => {
@@ -127,8 +124,9 @@ export function VideoGallerySection() {
 
   const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return
+    const scrollDistance = window.innerWidth < 768 ? 280 : 400
     scrollRef.current.scrollBy({
-      left: direction === "left" ? -400 : 400,
+      left: direction === "left" ? -scrollDistance : scrollDistance,
       behavior: "smooth",
     })
     setTimeout(updateScrollButtons, 300)
@@ -137,14 +135,14 @@ export function VideoGallerySection() {
   return (
     <section id="work" className="py-20 md:py-32 px-4 sm:px-6 lg:px-8 bg-card">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-12">Featured Work</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12">Featured Work</h2>
 
         <div className="relative">
           {canScrollLeft && (
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 z-10 text-4xl"
+              className="absolute left-0 md:left-2 lg:-translate-x-16 top-1/2 -translate-y-1/2 z-10 text-4xl bg-background/80 md:bg-transparent"
               onClick={() => scroll("left")}
             >
               <ChevronLeft />
@@ -155,7 +153,7 @@ export function VideoGallerySection() {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 z-10"
+              className="absolute right-0 md:right-2 lg:translate-x-16 top-1/2 -translate-y-1/2 z-10 bg-background/80 md:bg-transparent"
               onClick={() => scroll("right")}
             >
               <ChevronRight />
@@ -164,19 +162,19 @@ export function VideoGallerySection() {
 
           <div
             ref={scrollRef}
-            className="flex gap-6 overflow-x-hidden scroll-smooth snap-x snap-mandatory pb-4"
+            className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-hidden scroll-smooth snap-x snap-mandatory pb-4 px-1"
             onScroll={updateScrollButtons}
           >
             {VIDEOS.map((video) => (
-              <div key={video.id} className="w-80 flex-shrink-0 snap-start cursor-pointer">
+              <div key={video.id} className="w-64 sm:w-72 lg:w-80 flex-shrink-0 snap-start cursor-pointer">
                 <button onClick={() => setSelectedVideo(video)} className="w-full cursor-pointer">
                   <img
-                    src={video.thumbnail}
+                    src={video.thumbnail || "/placeholder.svg"}
                     alt={video.title}
                     className="rounded-lg aspect-video object-cover"
                     loading="lazy"
                   />
-                  <h3 className="mt-4 font-semibold">{video.title}</h3>
+                  <h3 className="mt-3 sm:mt-4 font-semibold text-sm sm:text-base">{video.title}</h3>
                 </button>
               </div>
             ))}
