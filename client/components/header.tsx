@@ -41,8 +41,8 @@ export function Header() {
   }, [isMobileMenuOpen])
 
   const navLinks = [
-    { href: "#work", label: "Work" },
     { href: "#services", label: "Services" },
+    { href: "#work", label: "Work" },
     { href: "#testimonials", label: "Testimonials" },
     { href: "#contact", label: "Contact" },
   ]
@@ -61,7 +61,6 @@ export function Header() {
           Studio
         </Link>
 
-        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
             <a key={link.href} href={link.href} className="text-sm font-medium transition-colors hover:text-primary">

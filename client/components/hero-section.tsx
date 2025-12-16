@@ -36,7 +36,7 @@ export function HeroSection() {
   }
 
   return (
-    <section id="home" className="min-h-screen pt-24 pb-12 md:pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <section id="/" className="min-h-screen pt-24 pb-12 md:pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center"
