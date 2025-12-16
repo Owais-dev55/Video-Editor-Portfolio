@@ -19,9 +19,15 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const handleLinkClick = () => {
-    setIsMobileMenuOpen(false)
-  }
+  const handleLinkClick = (href: string) => {
+  setIsMobileMenuOpen(false)
+
+  setTimeout(() => {
+    const el = document.querySelector(href)
+    el?.scrollIntoView({ behavior: "smooth" })
+  }, 100)
+}
+
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -93,7 +99,7 @@ export function Header() {
                 <motion.a
                   key={link.href}
                   href={link.href}
-                  onClick={handleLinkClick}
+                  onClick={() => handleLinkClick(link.href)}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
