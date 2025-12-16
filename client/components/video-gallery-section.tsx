@@ -44,6 +44,8 @@ const VIDEOS = [
   },
 ]
 
+/* ---------------- VIDEO MODAL (unchanged layout) ---------------- */
+
 function VideoModal({
   video,
   onClose,
@@ -88,14 +90,13 @@ function VideoModal({
 
             <button
               onClick={onClose}
-              className="absolute top-2 right-2 sm:top-4 sm:right-4 p-2 bg-background/80 rounded-full hover:bg-background transition-colors"
-              aria-label="Close video"
+              className="absolute top-3 right-3 p-2 bg-background/80 rounded-full"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="p-4 sm:p-6 border-t border-border">
-              <h3 className="font-semibold text-base sm:text-lg">{video.title}</h3>
+            <div className="p-4 border-t border-border">
+              <h3 className="font-semibold">{video.title}</h3>
             </div>
           </motion.div>
         </motion.div>
@@ -104,8 +105,12 @@ function VideoModal({
   )
 }
 
+/* ---------------- GALLERY SECTION ---------------- */
+
 export function VideoGallerySection() {
-  const [selectedVideo, setSelectedVideo] = useState<(typeof VIDEOS)[0] | null>(null)
+  const [selectedVideo, setSelectedVideo] =
+    useState<(typeof VIDEOS)[0] | null>(null)
+
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
@@ -113,7 +118,12 @@ export function VideoGallerySection() {
   const updateScrollButtons = () => {
     if (!scrollRef.current) return
     setCanScrollLeft(scrollRef.current.scrollLeft > 0)
-    setCanScrollRight(scrollRef.current.scrollLeft < scrollRef.current.scrollWidth - scrollRef.current.clientWidth - 10)
+    setCanScrollRight(
+      scrollRef.current.scrollLeft <
+        scrollRef.current.scrollWidth -
+          scrollRef.current.clientWidth -
+          10
+    )
   }
 
   useEffect(() => {
@@ -124,9 +134,9 @@ export function VideoGallerySection() {
 
   const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return
-    const scrollDistance = window.innerWidth < 768 ? 280 : 400
+    const distance = 400 // SAME as original for desktop
     scrollRef.current.scrollBy({
-      left: direction === "left" ? -scrollDistance : scrollDistance,
+      left: direction === "left" ? -distance : distance,
       behavior: "smooth",
     })
     setTimeout(updateScrollButtons, 300)
@@ -135,17 +145,20 @@ export function VideoGallerySection() {
   return (
     <section id="work" className="py-20 md:py-32 px-4 sm:px-6 lg:px-8 bg-card">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12">Featured Work</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+          Featured Work
+        </h2>
 
         <div className="relative">
+          {/* Desktop arrows ONLY */}
           {canScrollLeft && (
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-0 md:left-2 lg:-translate-x-16 top-1/2 -translate-y-1/2 z-10 text-4xl bg-background/80 md:bg-transparent"
+              className="hidden lg:flex absolute left-0 -translate-x-16 top-1/2 -translate-y-1/2 z-10"
               onClick={() => scroll("left")}
             >
-              <ChevronLeft />
+              <ChevronLeft className="w-6 h-6" />
             </Button>
           )}
 
@@ -153,28 +166,44 @@ export function VideoGallerySection() {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-0 md:right-2 lg:translate-x-16 top-1/2 -translate-y-1/2 z-10 bg-background/80 md:bg-transparent"
+              className="hidden lg:flex absolute right-0 translate-x-16 top-1/2 -translate-y-1/2 z-10"
               onClick={() => scroll("right")}
             >
-              <ChevronRight />
+              <ChevronRight className="w-6 h-6" />
             </Button>
           )}
 
+          {/* Carousel */}
           <div
             ref={scrollRef}
-            className="flex gap-3 sm:gap-4 lg:gap-6 overflow-x-hidden scroll-smooth snap-x snap-mandatory pb-4 px-1"
             onScroll={updateScrollButtons}
+            className="
+              flex gap-4 lg:gap-6
+              overflow-x-auto lg:overflow-x-hidden
+              scroll-smooth snap-x snap-mandatory
+              pb-4
+            "
           >
             {VIDEOS.map((video) => (
-              <div key={video.id} className="w-64 sm:w-72 lg:w-80 flex-shrink-0 snap-start cursor-pointer">
-                <button onClick={() => setSelectedVideo(video)} className="w-full cursor-pointer">
+              <div
+                key={video.id}
+                className="
+                  flex-shrink-0 snap-start
+                  w-72 sm:w-80 lg:w-80
+                "
+              >
+                <button
+                  onClick={() => setSelectedVideo(video)}
+                  className="w-full text-left"
+                >
                   <img
-                    src={video.thumbnail || "/placeholder.svg"}
+                    src={video.thumbnail}
                     alt={video.title}
                     className="rounded-lg aspect-video object-cover"
-                    loading="lazy"
                   />
-                  <h3 className="mt-3 sm:mt-4 font-semibold text-sm sm:text-base">{video.title}</h3>
+                  <h3 className="mt-4 font-semibold">
+                    {video.title}
+                  </h3>
                 </button>
               </div>
             ))}
@@ -182,7 +211,10 @@ export function VideoGallerySection() {
         </div>
       </div>
 
-      <VideoModal video={selectedVideo} onClose={() => setSelectedVideo(null)} />
+      <VideoModal
+        video={selectedVideo}
+        onClose={() => setSelectedVideo(null)}
+      />
     </section>
   )
 }
